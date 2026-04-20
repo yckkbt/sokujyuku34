@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英語自走式学習システム｜Unit 34</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Lato:wght@400;700;900&display=swap');
+  :root {
+    --blue: #1a4fa0; --orange: #e8630a; --light-blue: #e8f0fb; --light-orange: #fff3e8;
+    --green: #1a7a3c; --light-green: #e8f5ee; --gray: #555; --light-gray: #f5f5f5;
+    --border: #ddd; --red: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f2f5; color: #222; font-size: 15px; line-height: 1.7; }
+  .header { background: var(--blue); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .unit-badge { background: var(--orange); color: white; font-family: 'Lato', sans-serif; font-weight: 900; font-size: 22px; width: 48px; height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-title h1 { font-size: 17px; font-weight: 700; }
+  .header-title p { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.2); height: 4px; }
+  .progress-bar-fill { background: var(--orange); height: 4px; transition: width 0.4s ease; width: 0%; }
+  .steps-nav { background: white; border-bottom: 2px solid var(--border); overflow-x: auto; }
+  .steps-nav-inner { max-width: 860px; margin: 0 auto; display: flex; padding: 0 20px; }
+  .step-tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: #888; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; user-select: none; }
+  .step-tab:hover { color: var(--blue); }
+  .step-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+  .step-tab.done { color: var(--green); }
+  .step-tab.done::before { content: '✓ '; font-size: 11px; }
+  .main { max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; }
+  .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .step-intro { background: var(--light-blue); border-left: 4px solid var(--blue); border-radius: 6px; padding: 14px 16px; margin-bottom: 18px; font-size: 14px; color: #333; }
+  .step-intro strong { display: block; font-size: 15px; margin-bottom: 4px; color: var(--blue); }
+  .flow-diagram { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 14px 0; font-size: 13px; }
+  .flow-item { background: var(--blue); color: white; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+  .flow-arrow { color: var(--blue); font-weight: 700; }
+  .listen-btn { display: flex; align-items: center; gap: 10px; background: var(--orange); color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s, transform 0.1s; margin-bottom: 10px; }
+  .listen-btn:hover { background: #c7550a; transform: translateY(-1px); }
+  .done-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: var(--green); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; }
+  .done-btn:hover { background: #145e2d; }
+  .para-number { display: inline-flex; align-items: center; justify-content: center; background: var(--blue); color: white; width: 26px; height: 26px; border-radius: 50%; font-weight: 900; font-family: 'Lato', sans-serif; font-size: 14px; margin-right: 8px; flex-shrink: 0; }
+  .para-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .para-topic { font-size: 14px; font-weight: 700; color: white; background: var(--blue); padding: 3px 10px; border-radius: 4px; }
+  .english-text { font-family: 'Lato', sans-serif; font-size: 16px; line-height: 1.9; color: #1a1a1a; background: #fafafa; border-radius: 8px; padding: 16px; border: 1px solid #e8eaed; margin-bottom: 14px; }
+  .english-text .idiom { color: var(--orange); font-weight: 700; }
+  .english-text .grammar { color: var(--blue); font-weight: 700; }
+  .japanese-text { font-size: 14px; color: #444; line-height: 1.8; padding: 12px 16px; background: #fffdf5; border-radius: 8px; border-left: 3px solid var(--orange); margin-bottom: 16px; }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; margin-top: 16px; display: flex; align-items: center; gap: 6px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .vocab-item { display: flex; align-items: baseline; gap: 6px; background: var(--light-blue); border-radius: 6px; padding: 8px 12px; font-size: 14px; }
+  .vocab-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--blue); }
+  .vocab-sep { color: #aaa; font-size: 12px; }
+  .vocab-ja { color: #333; font-size: 13px; }
+  .idiom-list { display: flex; flex-direction: column; gap: 6px; }
+  .idiom-item { display: flex; align-items: baseline; gap: 8px; background: var(--light-orange); border-radius: 6px; padding: 8px 12px; font-size: 14px; flex-wrap: wrap; }
+  .idiom-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--orange); }
+  .idiom-ja { color: #444; font-size: 13px; }
+  .grammar-box { background: #f0f4ff; border: 1px solid #b8c8f0; border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 14px; }
+  .grammar-box .g-title { font-weight: 700; background: var(--blue); color: white; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
+  .grammar-box .g-sentence { font-family: 'Lato', sans-serif; font-size: 15px; color: #1a1a1a; margin-bottom: 8px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 3px solid var(--blue); }
+  .grammar-box .g-note { font-size: 13px; color: #555; line-height: 1.7; }
+  .check-box { background: var(--light-green); border: 1px solid #a8d8b8; border-radius: 8px; padding: 14px 16px; margin-top: 14px; }
+  .check-box .check-title { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .check-q { font-size: 14px; color: #333; }
+  .check-a-btn { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid var(--green); color: var(--green); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all 0.2s; margin-top: 4px; }
+  .check-a-btn:hover { background: var(--green); color: white; }
+  .check-answer { display: none; background: white; border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 6px; font-size: 14px; color: #222; margin-top: 6px; animation: fadeIn 0.3s ease; }
+  .check-answer.visible { display: block; }
+  .check-answer .a-label { color: var(--green); font-weight: 700; margin-right: 4px; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+  .quiz-item { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .quiz-q { font-size: 15px; color: #222; margin-bottom: 14px; font-weight: 500; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; font-size: 14px; transition: all 0.15s; user-select: none; }
+  .quiz-opt:hover { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.selected { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.correct { border-color: var(--green); background: var(--light-green); }
+  .quiz-opt.wrong { border-color: var(--red); background: #fdecea; }
+  .quiz-opt .opt-letter { width: 26px; height: 26px; border-radius: 50%; background: var(--light-gray); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .quiz-feedback { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; animation: fadeIn 0.3s ease; }
+  .quiz-feedback.correct-fb { background: var(--light-green); color: var(--green); border-left: 3px solid var(--green); display: block; }
+  .quiz-feedback.wrong-fb { background: #fdecea; color: var(--red); border-left: 3px solid var(--red); display: block; }
+  .submit-quiz-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; margin-top: 8px; }
+  .submit-quiz-btn:hover { background: #143d80; }
+  .quiz-result { display: none; background: var(--light-blue); border-radius: 10px; padding: 20px; text-align: center; margin-top: 20px; animation: fadeIn 0.4s ease; }
+  .quiz-result .score { font-size: 40px; font-weight: 900; color: var(--blue); font-family: 'Lato', sans-serif; }
+  .quiz-result .score-label { font-size: 14px; color: #666; margin-bottom: 12px; }
+  .step-section { display: none; }
+  .step-section.active { display: block; }
+  .next-step-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--blue); color: white; border: none; border-radius: 8px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; width: 100%; margin-top: 8px; }
+  .next-step-btn:hover { background: #143d80; }
+  .completion-banner { background: linear-gradient(135deg, var(--green), #2ecc71); color: white; border-radius: 12px; padding: 28px; text-align: center; margin-top: 20px; }
+  .completion-banner h2 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+  .completion-banner p { font-size: 14px; opacity: 0.9; }
+  @media (max-width: 600px) { .vocab-grid { grid-template-columns: 1fr 1fr; } .english-text { font-size: 15px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="unit-badge">34</div>
+    <div class="header-title">
+      <h1>A Mother's Heartbeat</h1>
+      <p>母親の心音</p>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+</div>
+
+<div class="steps-nav">
+  <div class="steps-nav-inner">
+    <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
+    <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
+    <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <div class="step-section active" id="step0">
+    <div class="card">
+      <div class="card-title"><span>🔊</span> Step 1｜通しリスニング</div>
+      <div class="step-intro">
+        <strong>最初は本文を見ないで通して聞いてみましょう</strong>
+        下の流れを意識しながら聞いてみよう。
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-item">寝かしつけの大変さ</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">心音の効果</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">母親の負担</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">現代的な解決策</div>
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（1回目）</button>
+      <audio id="audioPlayer" src="sokujukure100_eibun34.mp3" style="width:100%; margin-bottom:14px; display:block; border-radius:8px;"></audio>
+      <div class="step-intro" style="background:#fff3e8; border-left-color: var(--orange);">
+        <strong>次は本文を見ながら通して聞いてみましょう</strong>
+        内容を意識しながら聞こう。英文と日本語訳は Step 2 で確認できます。
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（2回目）</button>
+      <br>
+      <button class="done-btn" onclick="completeStep(0)">✓ リスニング完了 → 次へ</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-section" id="step1">
+
+    <!-- Para 1 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">1</span>
+        <span class="para-topic">赤ちゃんを寝かせる大変さ</span>
+      </div>
+      <div class="english-text">
+        Parents find getting a baby to fall asleep is <span class="idiom">not … any more than</span> raising a kid is. Some parents even <span class="idiom">go for drives</span> with their babies to get them to sleep! After spending hours trying to get their babies to fall asleep, many mothers will find their patience almost <span class="idiom">giving out</span>. When they have <span class="idiom">run out of</span> ideas, mothers often <span class="idiom">resort to</span> cradling their babies in their arms, which always works.
+      </div>
+      <div class="japanese-text">
+        親たちは、赤ちゃんを眠らせることが、子どもを育てるのと同じくらい、もはや簡単なことではないと感じています。中には、赤ちゃんを眠らせるために、車でドライブに出かける親さえいます。赤ちゃんを眠らせようと何時間も費やしたあと、多くの母親は、自分の忍耐力がほとんど限界に達していることに気づきます。考えが尽きてしまうと、母親たちは赤ちゃんを腕に抱いてあやすという方法に頼ることが多く、これはいつもうまくいきます。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">patience</span><span class="vocab-sep">｜</span><span class="vocab-ja">忍耐</span></div>
+        <div class="vocab-item"><span class="vocab-en">asleep</span><span class="vocab-sep">｜</span><span class="vocab-ja">眠って</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">not A any more than B</span><span class="idiom-ja">Bでないのと同様にAでない</span></div>
+        <div class="idiom-item"><span class="idiom-en">go for a drive</span><span class="idiom-ja">ドライブに行く</span></div>
+        <div class="idiom-item"><span class="idiom-en">give out</span><span class="idiom-ja">尽きる・力が尽きる</span></div>
+        <div class="idiom-item"><span class="idiom-en">run out of ~</span><span class="idiom-ja">〜を使い果たす</span></div>
+        <div class="idiom-item"><span class="idiom-en">resort to ~</span><span class="idiom-ja">〜に頼る・〜に訴える</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法①｜find + O + C（動名詞が目的語）</div>
+        <div class="g-sentence">Parents find <u>getting a baby to fall asleep</u> is not child's play …</div>
+        <div class="g-note"><strong>find</strong> の目的語として動名詞句 <strong>getting a baby to fall asleep</strong> が使われている。「〜することが…だとわかる」という意味。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q1</strong> なぜ赤ちゃんを寝かせるのは大変か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>忍耐が尽きるほど時間と労力がかかるから。</div>
+      </div>
+    </div>
+
+    <!-- Para 2 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">2</span>
+        <span class="para-topic">心音がもつ力</span>
+      </div>
+      <div class="english-text">
+        Studies show that 80% of mothers cradle their children in their left arms <span class="idiom">regardless of</span> their dominant hand. Research indicates that nothing is as soothing to a baby as the sound of its mother's heartbeat. No other sound can <span class="idiom">take the place of</span> her heartbeat to calm the baby. <span class="idiom">By degrees</span>, the baby learned to recognize its mother's heartbeat when he or she was in the mother.
+      </div>
+      <div class="japanese-text">
+        研究によると、母親の80％は、利き手に関係なく、左腕で子どもを抱くことが分かっています。また研究は、赤ちゃんにとって、母親の心音ほど心を落ち着かせる音はないことを示しています。赤ちゃんを落ち着かせるために、母親の心音の代わりになる音は、ほかにありません。赤ちゃんは、母親のおなかの中にいたときに、徐々に母親の心音を聞き分けられるようになったのです。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">soothing</span><span class="vocab-sep">｜</span><span class="vocab-ja">なだめるような</span></div>
+        <div class="vocab-item"><span class="vocab-en">indicate</span><span class="vocab-sep">｜</span><span class="vocab-ja">示す</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">regardless of ~</span><span class="idiom-ja">〜に関係なく</span></div>
+        <div class="idiom-item"><span class="idiom-en">take the place of ~</span><span class="idiom-ja">〜の代わりをする</span></div>
+        <div class="idiom-item"><span class="idiom-en">by degrees</span><span class="idiom-ja">徐々に・だんだんと</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法②｜否定語＋as … as（最上級的意味）</div>
+        <div class="g-sentence"><u>nothing</u> is as soothing to a baby <u>as</u> the sound of its mother's heartbeat</div>
+        <div class="g-note"><strong>nothing … as ～ as</strong> で「〜ほど…なものはない」という最上級的意味を表す。「母親の心音ほど赤ちゃんをなだめる音はない」という意味。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q2</strong> なぜ母親の心音は効果的か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>胎内にいたときから聞き慣れた音だから。</div>
+      </div>
+    </div>
+
+    <!-- Para 3 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">3</span>
+        <span class="para-topic">母親の負担と現代的な解決策</span>
+      </div>
+      <div class="english-text">
+        When babies cry, mothers must <span class="idiom">attend to</span> them almost immediately. Many mothers, who constantly <span class="idiom">have their babies on their minds</span>, are desperately <span class="idiom">in need of</span> a rest from <span class="idiom">caring for</span> their babies. Often, they are close to <span class="idiom">breaking into tears</span> from stress. A company in Japan might have decided to <span class="idiom">take pity on</span> these mothers <span class="grammar">anxious about</span> soothing their babies. The company hires musicians to make a unique musical piece by combining the mother's favorite song, recordings of her heartbeat, and the baby's gurgles. Many mothers cannot <span class="idiom">do without</span> it when putting their babies to bed.
+      </div>
+      <div class="japanese-text">
+        赤ちゃんが泣くと、母親はほとんどすぐに対応しなければなりません。常に赤ちゃんのことが頭から離れない多くの母親は、赤ちゃんの世話から少し休むことを切実に必要としています。しばしば、彼女たちはストレスのあまり、今にも泣き出しそうになります。日本のある会社は、赤ちゃんをあやすことに不安を感じているこれらの母親たちを気の毒に思ったのかもしれません。その会社は、母親の好きな歌、母親の心音の録音、そして赤ちゃんの喉を鳴らす声を組み合わせた、独自の音楽作品を作るために音楽家を雇っています。多くの母親は、赤ちゃんを寝かしつけるときに、それなしではいられなくなっています。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">rest</span><span class="vocab-sep">｜</span><span class="vocab-ja">休息</span></div>
+        <div class="vocab-item"><span class="vocab-en">unique</span><span class="vocab-sep">｜</span><span class="vocab-ja">独自の・独特の</span></div>
+        <div class="vocab-item"><span class="vocab-en">gurgle</span><span class="vocab-sep">｜</span><span class="vocab-ja">喉を鳴らす声</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">attend to ~</span><span class="idiom-ja">〜に対応する・〜の世話をする</span></div>
+        <div class="idiom-item"><span class="idiom-en">have A on one's mind</span><span class="idiom-ja">Aが頭から離れない</span></div>
+        <div class="idiom-item"><span class="idiom-en">in need of ~</span><span class="idiom-ja">〜を必要としている</span></div>
+        <div class="idiom-item"><span class="idiom-en">care for ~</span><span class="idiom-ja">〜の世話をする</span></div>
+        <div class="idiom-item"><span class="idiom-en">break into tears</span><span class="idiom-ja">泣き出す</span></div>
+        <div class="idiom-item"><span class="idiom-en">take pity on ~</span><span class="idiom-ja">〜を気の毒に思う</span></div>
+        <div class="idiom-item"><span class="idiom-en">anxious about ~</span><span class="idiom-ja">〜を心配して</span></div>
+        <div class="idiom-item"><span class="idiom-en">do without ~</span><span class="idiom-ja">〜なしで済ます</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法③｜形容詞句による後置修飾（anxious about）</div>
+        <div class="g-sentence">these mothers <u>anxious about</u> soothing their babies</div>
+        <div class="g-note"><strong>anxious about ～</strong> が形容詞句として <strong>mothers</strong> を後置修飾している。「赤ちゃんをあやすことに不安を感じているこれらの母親たち」という意味。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q3</strong> 日本の会社は何をしたか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>母親の好きな歌・心音・赤ちゃんの声を組み合わせた独自の音楽を作った。</div>
+      </div>
+    </div>
+
+    <!-- Para 4 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">4</span>
+        <span class="para-topic">読者への問いかけ</span>
+      </div>
+      <div class="english-text">
+        <span class="idiom">What do you say to</span> asking your mother how she managed to get you to sleep when you were a baby? She will be sure to have wonderful memories to share with you.
+      </div>
+      <div class="japanese-text">
+        赤ちゃんだったころ、あなたをどのようにして眠らせていたのか、お母さんに聞いてみるのはどうでしょうか。きっと、お母さんはあなたと分かち合いたい、すばらしい思い出を持っているはずです。
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">What do you say to ~ing?</span><span class="idiom-ja">〜してはどうですか</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法④｜What do you say to ~ing?（提案表現）</div>
+        <div class="g-sentence"><u>What do you say to asking</u> your mother …?</div>
+        <div class="g-note"><strong>to</strong> は前置詞なので後ろに動名詞（~ing）が来る。「〜するのはどうですか」という提案の表現。How about ~ing? と同じ意味。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q4</strong> 筆者は何を勧めているか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>赤ちゃんだったころのことをお母さんに聞いてみること。</div>
+      </div>
+    </div>
+
+    <div class="card" style="background: var(--light-blue);">
+      <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:10px;">【15字要約】</div>
+      <div style="font-size:20px; font-weight:900; color:#222; letter-spacing:0.05em;">母の心音が安心を生む</div>
+    </div>
+
+    <button class="next-step-btn" onclick="completeStep(1)">Step 3｜確認クイズへ →</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-section" id="step2">
+    <div class="card">
+      <div class="card-title"><span>📝</span> Step 3｜確認クイズ</div>
+      <p style="font-size:14px; color:#666; margin-bottom:20px;">本文の内容を確認しましょう。各問題の選択肢を選んでから「採点する」を押してね。</p>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q1.</strong> According to the text, what do some parents do to get their babies to sleep?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">A</div> They play recordings of heartbeats.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="true"><div class="opt-letter">B</div> They go for drives with their babies.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">C</div> They hire musicians to play music.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">D</div> They cradle their babies in their right arms.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q1"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q2.</strong> Why do 80% of mothers cradle babies in their left arms?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">A</div> Because their right arm is stronger.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="true"><div class="opt-letter">B</div> They do so regardless of which hand is dominant.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">C</div> Because it is easier to hold the baby that way.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">D</div> Because doctors recommend it.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q2"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q3.</strong> 次のイディオムの意味として正しいものを選べ。<br><br><em>take the place of ~</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">A</div> 〜を気の毒に思う</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="true"><div class="opt-letter">B</div> 〜の代わりをする</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">C</div> 〜に頼る</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">D</div> 〜を必要としている</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q3"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q4.</strong> What does the Japanese company combine to make a unique musical piece?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">A</div> The baby's cries, lullabies, and nature sounds.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="true"><div class="opt-letter">B</div> The mother's favorite song, her heartbeat recording, and the baby's gurgles.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">C</div> Classical music, heartbeat sounds, and white noise.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">D</div> The father's voice, the mother's heartbeat, and a lullaby.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q4"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q5.</strong> 空欄に入る最も適切な語を選べ。<br><br><em>What do you say to ______ your mother how she got you to sleep?</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">A</div> ask</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="true"><div class="opt-letter">B</div> asking</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">C</div> asked</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">D</div> to ask</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q5"></div>
+      </div>
+
+      <button class="submit-quiz-btn" onclick="submitQuiz()">採点する</button>
+
+      <div class="quiz-result" id="quizResult">
+        <div class="score" id="scoreNum">0/5</div>
+        <div class="score-label">正解数</div>
+        <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
+      </div>
+
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-section" id="step3">
+    <div class="card">
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
+      <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
+        <div style="font-size:20px; font-weight:900; color:#222;">母の心音が安心を生む</div>
+      </div>
+      <div class="step-intro">
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">14</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
+      </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+    </div>
+    <div class="completion-banner" id="completionBanner" style="display:none;">
+      <h2>🎉 Unit 34 完了！</h2>
+      <p>お疲れ様でした。母親の心音と赤ちゃんの関係について学習しました。<br>次のユニットへ進みましょう！</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const stepDone=[false,false,false,false];
+  const quizAnswers={q1:null,q2:null,q3:null,q4:null,q5:null};
+  const correctAnswers={q1:false,q2:false,q3:false,q4:false,q5:false};
+
+  function goToStep(n){
+    document.querySelectorAll('.step-section').forEach((s,i)=>s.classList.toggle('active',i===n));
+    document.querySelectorAll('.step-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  }
+  function completeStep(n){
+    stepDone[n]=true;
+    const tab=document.getElementById('tab'+n);
+    tab.classList.add('done');tab.classList.remove('active');
+    document.getElementById('progressBar').style.width=(stepDone.filter(Boolean).length/4*100)+'%';
+    if(n<3)goToStep(n+1);
+    else{document.getElementById('completionBanner').style.display='block';document.getElementById('completionBanner').scrollIntoView({behavior:'smooth'});}
+  }
+  function toggleAnswer(btn){
+    const a=btn.nextElementSibling;
+    const v=a.classList.toggle('visible');
+    btn.textContent=v?'▲ 閉じる':'▼ 答えを見る';
+  }
+  function playAudio(){
+    const audio=document.getElementById('audioPlayer');
+    if(audio.paused){audio.play();}else{audio.pause();audio.currentTime=0;}
+  }
+  function selectOpt(el,qid){
+    el.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('selected'));
+    el.classList.add('selected');quizAnswers[qid]=el;correctAnswers[qid]=el.dataset.correct==='true';
+  }
+  function submitQuiz(){
+    const questions=['q1','q2','q3','q4','q5'];
+    let score=0;
+    const feedbacks={
+      q1:{correct:'正解！Para 1「Some parents even go for drives with their babies」が根拠です。',wrong:'不正解。Para 1「go for drives」を確認しよう。'},
+      q2:{correct:'正解！「regardless of their dominant hand」つまり利き手に関係なく左腕で抱くとあります。',wrong:'不正解。Para 2「regardless of their dominant hand」を見直そう。'},
+      q3:{correct:'正解！take the place of は「〜の代わりをする」という意味です。',wrong:'不正解。Para 2のイディオム一覧を見直してみよう。'},
+      q4:{correct:'正解！母親の好きな歌・心音の録音・赤ちゃんのgurglesの3つを組み合わせています。',wrong:'不正解。Para 3「combining the mother\'s favorite song, recordings of her heartbeat, and the baby\'s gurgles」を確認しよう。'},
+      q5:{correct:'正解！What do you say to の後の to は前置詞なので動名詞（~ing）が続きます。',wrong:'不正解。Para 4の文法④「What do you say to ~ing?」を確認しよう。'},
+    };
+    questions.forEach(q=>{
+      const fb=document.getElementById('fb-'+q);
+      const selected=quizAnswers[q];
+      if(!selected){fb.className='quiz-feedback wrong-fb';fb.textContent='未選択。必ず選んでから採点してね。';return;}
+      const isCorrect=correctAnswers[q];
+      if(isCorrect)score++;
+      selected.classList.remove('selected');
+      selected.classList.add(isCorrect?'correct':'wrong');
+      if(!isCorrect)selected.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>{if(o.dataset.correct==='true')o.classList.add('correct');});
+      fb.className='quiz-feedback '+(isCorrect?'correct-fb':'wrong-fb');
+      fb.textContent=(isCorrect?'✓ ':'✗ ')+feedbacks[q][isCorrect?'correct':'wrong'];
+    });
+    const result=document.getElementById('quizResult');
+    result.style.display='block';
+    document.getElementById('scoreNum').textContent=score+'/5';
+    const msgs=['💪 もう一度本文を読み直してチャレンジしてみよう！','💪 もう一度本文を読み直してチャレンジしてみよう！','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','👏 よくできました！あと一息！','🎉 満点！素晴らしい理解力です！'];
+    document.getElementById('scoreMsg').textContent=msgs[score];
+    document.getElementById('toStep4Btn').style.display='flex';
+    result.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'not A any more than B',ja:'BでないのとAでないのは同じ'},
+    {en:'go for a drive',ja:'ドライブに行く'},
+    {en:'give out',ja:'尽きる・力が尽きる'},
+    {en:'run out of ~',ja:'〜を使い果たす'},
+    {en:'resort to ~',ja:'〜に頼る・〜に訴える'},
+    {en:'regardless of ~',ja:'〜に関係なく'},
+    {en:'take the place of ~',ja:'〜の代わりをする'},
+    {en:'by degrees',ja:'徐々に・だんだんと'},
+    {en:'attend to ~',ja:'〜に対応する・〜の世話をする'},
+    {en:'have A on one\'s mind',ja:'Aが頭から離れない'},
+    {en:'in need of ~',ja:'〜を必要としている'},
+    {en:'break into tears',ja:'泣き出す'},
+    {en:'take pity on ~',ja:'〜を気の毒に思う'},
+    {en:'do without ~',ja:'〜なしで済ます'},
+    {en:'What do you say to ~ing?',ja:'〜してはどうですか'},
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
+</script>
+
+</body>
+</html>
